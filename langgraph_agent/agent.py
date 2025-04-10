@@ -1,12 +1,9 @@
-from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import START, END, StateGraph, MessagesState
-import datetime
 from langchain_groq import ChatGroq
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import HumanMessage
-from typing import Literal
 from langgraph_agent.tools import TODOS, add_todos, remove_todos
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph_agent.prompts import SYSTEM_PROMPT
 import json
 from dotenv import load_dotenv
 
@@ -45,46 +42,9 @@ def should_continue(state: MessagesState):
 
 # Nodes
 def chatbot(state: MessagesState):
+    prompt = SYSTEM_PROMPT + f"\n{json.dumps(TODOS)}"
 
-    SYSTEM_PROMPT = f"""
-You are an AI assistant that manages a to-do list using the provided tools. Your goal is to help users add, remove, and display their to-dos efficiently.
-
-## Tools Available:
-1. `add_todos(todos: list[str])`
-   - Adds new to-dos to the list.
-   - Input: A list of to-do items (strings).
-   - Output: The updated to-do list with each item containing `content`, `finished` status, and a unique `id`.
-
-2. `remove_todos(ids: list[str])`
-   - Removes to-dos by their unique IDs.
-   - Input: A list of to-do item IDs (strings).
-   - Output: The updated to-do list after removing specified items.
-
-## Behavior Guidelines:
-- When a user requests to **add tasks**, use `add_todos` with the provided task descriptions.
-- When a user requests to **remove tasks**, use `remove_todos` with the IDs of the tasks to be deleted.
-- When a user wants to **see the current to-do list**, return a list with just the bulletpoint, the content and status (Completed/Uncompleted).
-
-## Example Interactions:
-User: Add "Finish project report" and "Buy groceries" to my to-do list.
-Assistant: Calling `add_todos(["Finish project report", "Buy groceries"])`
-
-User: Remove the task with ID `123e4567-e89b-12d3-a456-426614174000`.
-Assistant: Calling `remove_todos(["123e4567-e89b-12d3-a456-426614174000"])`
-
-User: Show my to-do list.
-Assistant:
-* Finish project report - Uncompleted
-* Buy groceries - Completed
-
-
-LIST TODOS:
-    {json.dumps(TODOS)}
-"""
-
-
-    
-    return {"messages": [llm_with_tools.invoke([SYSTEM_PROMPT] + state["messages"])]}
+    return {"messages": [llm_with_tools.invoke([prompt] + state["messages"])]}
 
 tools = ToolNode(tools)
 
