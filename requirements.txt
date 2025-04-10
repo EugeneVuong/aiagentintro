@@ -6,6 +6,6 @@ langgraph==0.3.2
 fastapi[standard]==0.115.10
 langgraph-cli[inmem]==0.1.74
 streamlit==1.42.2
-
+python-dotenv
 
 

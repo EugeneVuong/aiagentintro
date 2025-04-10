@@ -8,6 +8,9 @@ from typing import Literal
 from langgraph_agent.tools import TODOS, add_todos, remove_todos
 from langgraph.checkpoint.memory import MemorySaver
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 llm = ChatGroq(
     model="llama-3.3-70b-versatile", temperature=0
